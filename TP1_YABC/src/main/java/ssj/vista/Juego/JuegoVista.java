@@ -281,18 +281,26 @@ public class JuegoVista extends JuegoBase {
     }
 
     private void ejecutarPantallaFinal(String mensaje, javafx.scene.paint.Color color) {
-        gameOver = true;
-        playSonido.pararMusica();
+    gameOver = true;
+    playSonido.pararMusica();
 
-        javafx.scene.layout.StackPane overlay = new javafx.scene.layout.StackPane();
-        overlay.setPrefSize(WIDTH, HEIGHT);
-        overlay.setStyle("-fx-background-color: black;");
+    javafx.scene.layout.StackPane overlay = new javafx.scene.layout.StackPane();
+    overlay.setPrefSize(WIDTH, HEIGHT);
+    overlay.setStyle("-fx-background-color: black;");
 
-        javafx.scene.text.Text texto = new javafx.scene.text.Text(mensaje);
-        texto.setFill(color);
-        texto.setStyle("-fx-font-size: 72px; -fx-font-weight: bold;");
+    javafx.scene.text.Text texto = new javafx.scene.text.Text(mensaje);
+    texto.setFill(color);
+    texto.setStyle("-fx-font-size: 72px; -fx-font-weight: bold;");
 
-        overlay.getChildren().add(texto);
-        root.getChildren().add(overlay);
-    }
+    overlay.getChildren().add(texto);
+    root.getChildren().add(overlay);
+
+    PauseTransition delay = new PauseTransition(Duration.seconds(3));
+
+    delay.setOnFinished(event -> {
+        stage.setScene(menu.getScene());
+    });
+
+    delay.play();
+}
 }
