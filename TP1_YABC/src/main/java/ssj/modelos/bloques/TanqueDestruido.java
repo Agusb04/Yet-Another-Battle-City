@@ -23,6 +23,6 @@ public class TanqueDestruido extends Bloque {
 
     @Override
     public boolean esTransitable() {
-        return false;
+        return true;
     }
 }

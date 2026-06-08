@@ -40,8 +40,6 @@ public abstract class JuegoBase {
     protected List<PowerupView> powerupsView = new ArrayList<>();
 
     protected boolean gameOver = false;
-    protected int nivelActual = 1;
-    protected final int MAX_NIVELES = 3;
 
     protected Nivel nivel;
     protected Image imgDisparo;
@@ -73,8 +71,11 @@ public abstract class JuegoBase {
 
     // Métodos abstractos de comunicación y ciclo de vida
     public abstract ssj.controlador.ControladorJuego getControlador();
-    protected abstract void renderizar();
-    protected abstract void mostrarDerrota();
-    protected abstract void mostrarVictoriaFinal();
-    protected abstract void mostrarVictoriaNivel();
+    public abstract void renderizar();
+    public abstract void mostrarDerrota();
+    public abstract void mostrarVictoriaFinal();
+    public abstract void mostrarVictoriaNivel();
+    public abstract int getCantidadJugadores();
+    public abstract void avanzarSiguienteNivel();
+    public abstract void agregarPowerupView(Powerup p);
 }

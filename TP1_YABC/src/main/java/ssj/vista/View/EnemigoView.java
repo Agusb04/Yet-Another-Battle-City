@@ -2,18 +2,16 @@ package ssj.vista.View;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import ssj.modelos.tanques.Enemigo;
 import ssj.vista.Utils.Grafico;
 import ssj.modelos.LogicaMovimiento.Direccion;
 
 import java.util.Objects;
 
-public class EnemigoView extends StackPane {
+public class EnemigoView {
 
     private final Enemigo enemigo;
     private final ImageView sprite;
-    private final ImageView overlayInvulnerable;
 
     private final Image spriteQuieto;
     private final Image spriteMoviendo;
@@ -48,17 +46,6 @@ public class EnemigoView extends StackPane {
         sprite.setFitWidth(20);
         sprite.setFitHeight(20);
 
-        overlayInvulnerable = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream(Grafico.ESCUDO_INVULNERABILIDAD))));
-        overlayInvulnerable.setFitWidth(20);
-        overlayInvulnerable.setFitHeight(20);
-        overlayInvulnerable.setOpacity(0.6);
-        overlayInvulnerable.setVisible(false);
-
-        getChildren().addAll(sprite, overlayInvulnerable);
-
-        setLayoutX(enemigo.getX());
-        setLayoutY(enemigo.getY());
-
         xAnterior = enemigo.getX();
         yAnterior = enemigo.getY();
     }
@@ -71,15 +58,15 @@ public class EnemigoView extends StackPane {
             sprite.setImage(toggleSprite ? spriteMoviendo : spriteQuieto);
         }
 
-        setLayoutX(enemigo.getX());
-        setLayoutY(enemigo.getY());
-
         Direccion dir = enemigo.getDireccionActual();
         if (dir != null) {
-            sprite.setRotate(dir.getAngulo());
+            sprite.setRotate(switch (dir) {
+                case ARRIBA -> 270;
+                case ABAJO -> 90;
+                case IZQUIERDA -> 180;
+                case DERECHA -> 0;
+            });
         }
-
-        overlayInvulnerable.setVisible(enemigo.isInvulnerable());
 
         xAnterior = enemigo.getX();
         yAnterior = enemigo.getY();

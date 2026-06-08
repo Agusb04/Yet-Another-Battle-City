@@ -36,14 +36,6 @@ public class Disparo {
         return posicion.getY();
     }
 
-    public Direccion getDireccion() {
-        return direccion;
-    }
-
-    public double getVelocidad() {
-        return velocidad;
-    }
-
     public boolean isActivo() {
         return activo;
     }
@@ -54,6 +46,14 @@ public class Disparo {
 
     public Tanque getTanqueOrigen() { // <<< NUEVO
         return tanqueOrigen;
+    }
+
+    public Direccion getDireccion() {
+        return direccion;
+    }
+
+    public double getVelocidad() {
+        return velocidad;
     }
 
     public void setDireccion(Direccion direccion) {

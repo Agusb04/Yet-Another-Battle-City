@@ -37,7 +37,7 @@ public class EnemigoBasicoTest {
 
         e.moverse();
 
-        assertEquals(oldX + 0.25, e.posicion.getX(), 0.001);
+        assertEquals(oldX + 0.3, e.posicion.getX(), 0.001);
         assertEquals(oldY, e.posicion.getY(), 0.001);
     }
 

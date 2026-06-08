@@ -33,6 +33,10 @@ public class Juego {
         return niveles.get(nivelActualIndex);
     }
 
+    public boolean haySiguienteNivel() {
+        return nivelActualIndex < niveles.size() - 1;
+    }
+
     public void avanzarNivel() {
         if (nivelActualIndex < niveles.size() - 1) {
             nivelActualIndex++;
@@ -41,10 +45,6 @@ public class Juego {
 
     public int obtenerNumeroNivelActual() {
         return nivelActualIndex + 1;
-    }
-
-    public boolean estaTerminado() {
-        return nivelActualIndex >= niveles.size() - 1 && getNivelActual() != null && getNivelActual().estaCompletado();
     }
 
     public int getCantidadJugadores() {

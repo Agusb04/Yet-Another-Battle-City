@@ -17,15 +17,15 @@ public class ControladorInput {
         scene.setOnKeyReleased(e -> teclasPresionadas.remove(e.getCode()));
     }
 
-    public boolean p1Arriba() { return cantidadJugadores == 1 ? teclasPresionadas.contains(KeyCode.UP) : teclasPresionadas.contains(KeyCode.W); }
-    public boolean p1Abajo()  { return cantidadJugadores == 1 ? teclasPresionadas.contains(KeyCode.DOWN) : teclasPresionadas.contains(KeyCode.S); }
-    public boolean p1Izquierda() { return cantidadJugadores == 1 ? teclasPresionadas.contains(KeyCode.LEFT) : teclasPresionadas.contains(KeyCode.A); }
-    public boolean p1Derecha()   { return cantidadJugadores == 1 ? teclasPresionadas.contains(KeyCode.RIGHT) : teclasPresionadas.contains(KeyCode.D); }
-    public boolean p1Disparar()  { return cantidadJugadores == 1 ? teclasPresionadas.contains(KeyCode.SPACE) : teclasPresionadas.contains(KeyCode.F); }
+    public boolean p1Arriba() { return teclasPresionadas.contains(KeyCode.UP); }
+    public boolean p1Abajo()  { return teclasPresionadas.contains(KeyCode.DOWN); }
+    public boolean p1Izquierda() { return teclasPresionadas.contains(KeyCode.LEFT); }
+    public boolean p1Derecha()   { return teclasPresionadas.contains(KeyCode.RIGHT); }
+    public boolean p1Disparar()  { return teclasPresionadas.contains(KeyCode.SPACE); }
 
-    public boolean p2Arriba() { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.UP); }
-    public boolean p2Abajo()  { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.DOWN); }
-    public boolean p2Izquierda() { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.LEFT); }
-    public boolean p2Derecha()   { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.RIGHT); }
-    public boolean p2Disparar()  { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.ENTER); }
+    public boolean p2Arriba() { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.W); }
+    public boolean p2Abajo()  { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.S); }
+    public boolean p2Izquierda() { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.A); }
+    public boolean p2Derecha()   { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.D); }
+    public boolean p2Disparar()  { return cantidadJugadores == 2 && teclasPresionadas.contains(KeyCode.F); }
 }

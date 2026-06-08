@@ -17,16 +17,16 @@ public class CascoTest {
     public void testActivarEfecto() {
         Casco casco = new Casco(0,0);
         Jugador jugador = new Jugador(1,0, 0, 3);
-        assertFalse(jugador.estaInvulnerable());
+        assertFalse(jugador.isInvulnerable());
         casco.activar(jugador);
-        assertTrue(jugador.estaInvulnerable());
+        assertTrue(jugador.isInvulnerable());
     }
 
     @Test
     public void testSinActivarNoCambiaTanque() {
         Casco casco = new Casco(0,0);
         Tanque tanque = new Jugador(1,0, 0, 3);
-        assertFalse(tanque.invulnerable);
+        assertFalse(tanque.isInvulnerable());
     }
 
 }

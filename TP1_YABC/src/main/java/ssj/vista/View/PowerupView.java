@@ -16,6 +16,10 @@ public class PowerupView {
         return sprite;
     }
 
+    public Powerup getModelo() {
+        return modelo;
+    }
+
     public double getX() {
         return modelo.getX();
     }

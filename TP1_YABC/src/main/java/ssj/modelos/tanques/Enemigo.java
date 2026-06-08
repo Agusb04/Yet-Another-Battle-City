@@ -10,6 +10,10 @@ import java.util.Random;
 
 public class Enemigo extends Tanque {
 
+    private static final int TAM_TANQUE = 20;
+    private static final int ALTURA_BARRA = 50;
+    private static final int TAM_BALA = 6;
+
     private double tiempoRestante;
     private double tiempoSinMoverse;
     private final Random rand = new Random();
@@ -20,7 +24,7 @@ public class Enemigo extends Tanque {
     private double ultimoX;
     private double ultimoY;
 
-    protected TipoEnemigo tipo;
+    private TipoEnemigo tipo;
 
     public Enemigo(int x, int y, int vida, double velocidad, double cadenciaDisparo, TipoEnemigo tipo) {
         super(x, y, vida, velocidad);
@@ -68,18 +72,16 @@ public class Enemigo extends Tanque {
                 double newX = posicion.getX() + d.getDx() * velocidad;
                 double newY = posicion.getY() + d.getDy() * velocidad;
 
-                Rect test = new Rect(newX, newY, 20, 20);
+                Rect test = new Rect(newX, newY, TAM_TANQUE, TAM_TANQUE);
                 boolean bloqueado = false;
 
-                double tamEnemigo = 20;
-                double alturaBarra = 50;
-                double maxY = altoMapa - tamEnemigo - alturaBarra;
-                if (newX < 0 || newY < 0 || newX + tamEnemigo > anchoMapa || newY > maxY) {
+                double maxY = altoMapa - TAM_TANQUE - ALTURA_BARRA;
+                if (newX < 0 || newY < 0 || newX + TAM_TANQUE > anchoMapa || newY > maxY) {
                     bloqueado = true;
                 } else {
                     for (Bloque b : bloques) {
                         if (!b.esTransitable()) {
-                            Rect rB = new Rect(b.getX(), b.getY(), 20, 20);
+                            Rect rB = new Rect(b.getX(), b.getY(), TAM_TANQUE, TAM_TANQUE);
                             if (test.intersects(rB)) {
                                 bloqueado = true;
                                 break;
@@ -120,24 +122,22 @@ public class Enemigo extends Tanque {
         double newX = oldX + direccionActual.getDx() * velocidad;
         double newY = oldY + direccionActual.getDy() * velocidad;
 
-        double tamEnemigo = 20;
-        double alturaBarra = 50;
-        double maxY = altoMapa - tamEnemigo - alturaBarra;
+        double maxY = altoMapa - TAM_TANQUE - ALTURA_BARRA;
 
-        if (newX < 0 || newY < 0 || newX + tamEnemigo > anchoMapa || newY > maxY) return;
+        if (newX < 0 || newY < 0 || newX + TAM_TANQUE > anchoMapa || newY > maxY) return;
 
-        Rect nuevoBounds = new Rect(newX, newY, tamEnemigo, tamEnemigo);
+        Rect nuevoBounds = new Rect(newX, newY, TAM_TANQUE, TAM_TANQUE);
 
         for (Bloque b : bloques) {
             if (!b.esTransitable()) {
-                Rect rB = new Rect(b.getX(), b.getY(), 20, 20);
+                Rect rB = new Rect(b.getX(), b.getY(), TAM_TANQUE, TAM_TANQUE);
                 if (nuevoBounds.intersects(rB)) return;
             }
         }
 
         for (Tanque t : tanques) {
             if (t == this) continue;
-            Rect rT = new Rect(t.getX(), t.getY(), 20, 20);
+            Rect rT = new Rect(t.getX(), t.getY(), TAM_TANQUE, TAM_TANQUE);
             if (nuevoBounds.intersects(rT)) return;
         }
 
@@ -146,20 +146,17 @@ public class Enemigo extends Tanque {
     }
 
     public Disparo disparar(int velocidadBala) {
-        int balaSize = 6;
-        int tanqueSize = 20;
-
-        double centerX = posicion.getX() + tanqueSize / 2.0 - balaSize / 2.0;
-        double centerY = posicion.getY() + tanqueSize / 2.0 - balaSize / 2.0;
+        double centerX = posicion.getX() + TAM_TANQUE / 2.0 - TAM_BALA / 2.0;
+        double centerY = posicion.getY() + TAM_TANQUE / 2.0 - TAM_BALA / 2.0;
 
         double spawnX = centerX;
         double spawnY = centerY;
 
         switch (direccionActual) {
-            case ARRIBA -> spawnY = posicion.getY() - balaSize;
-            case ABAJO -> spawnY = posicion.getY() + tanqueSize;
-            case IZQUIERDA -> spawnX = posicion.getX() - balaSize;
-            case DERECHA -> spawnX = posicion.getX() + tanqueSize;
+            case ARRIBA -> spawnY = posicion.getY() - TAM_BALA;
+            case ABAJO -> spawnY = posicion.getY() + TAM_TANQUE;
+            case IZQUIERDA -> spawnX = posicion.getX() - TAM_BALA;
+            case DERECHA -> spawnX = posicion.getX() + TAM_TANQUE;
         }
 
         return new Disparo(spawnX, spawnY, direccionActual, velocidadBala, false, this);

@@ -14,7 +14,8 @@ public class Jugador extends Tanque {
     private long finCongelamiento = 0;
 
 
-    private static final int JUGADOR_SIZE = 20;
+    private static final int TAM_TANQUE = 20;
+    private static final int TAM_BALA = 6;
 
     public Jugador(int numeroJugador, int x, int y, int vidasIniciales) {
         super(x, y, 1, 0.5);
@@ -46,19 +47,18 @@ public class Jugador extends Tanque {
     public Disparo disparo() {
         if (disparoActivo == null || !disparoActivo.isActivo()) {
             int balaVel = 1;
-            int balaSize = 6;
 
-            double centerX = posicion.getX() + JUGADOR_SIZE / 2.0 - balaSize / 2.0;
-            double centerY = posicion.getY() + JUGADOR_SIZE / 2.0 - balaSize / 2.0;
+            double centerX = posicion.getX() + TAM_TANQUE / 2.0 - TAM_BALA / 2.0;
+            double centerY = posicion.getY() + TAM_TANQUE / 2.0 - TAM_BALA / 2.0;
 
             double spawnX = centerX;
             double spawnY = centerY;
 
             switch (direccionActual) {
-                case ARRIBA -> spawnY = posicion.getY() - balaSize;
-                case ABAJO -> spawnY = posicion.getY() + JUGADOR_SIZE;
-                case IZQUIERDA -> spawnX = posicion.getX() - balaSize;
-                case DERECHA -> spawnX = posicion.getX() + JUGADOR_SIZE;
+                case ARRIBA -> spawnY = posicion.getY() - TAM_BALA;
+                case ABAJO -> spawnY = posicion.getY() + TAM_TANQUE;
+                case IZQUIERDA -> spawnX = posicion.getX() - TAM_BALA;
+                case DERECHA -> spawnX = posicion.getX() + TAM_TANQUE;
             }
 
             disparoActivo = new Disparo(
@@ -89,7 +89,7 @@ public class Jugador extends Tanque {
 
     @Override
     public void recibirImpacto(boolean esDisparoPotenciado) {
-        if (!invulnerable && estaVivo()) {
+        if (!isInvulnerable() && estaVivo()) {
             vida = 0;
             vidas--;
             if (vidas > 0) respawnear();
@@ -102,7 +102,7 @@ public class Jugador extends Tanque {
         posicion.setX(posicionInicial.getX());
         posicion.setY(posicionInicial.getY());
         disparoActivo = null;
-        invulnerable = false;
+        setInvulnerable(false);
         disparoPotenciado = false;
         congelado = false;
         powerUpActivo = null;
@@ -137,8 +137,6 @@ public class Jugador extends Tanque {
             }
         }
     }
-
-    public boolean estaInvulnerable() { return invulnerable; }
 
     public int getVidas() { return vidas; }
 }

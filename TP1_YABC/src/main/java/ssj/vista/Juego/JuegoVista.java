@@ -15,7 +15,7 @@ import ssj.modelos.tanques.Enemigo;
 import ssj.modelos.tanques.Jugador;
 import ssj.modelos.disparo.Disparo;
 import ssj.modelos.Nivel.Nivel;
-import ssj.modelos.powerups.*;
+import ssj.modelos.powerups.Powerup;
 import ssj.controlador.ControladorInput;
 import ssj.controlador.ControladorJuego;
 import ssj.vista.Menu.VistaInicio;
@@ -32,6 +32,7 @@ public class JuegoVista extends JuegoBase {
     private final Scene scene;
     private final VistaMenu menu;
     private final int cantidadJugadores;
+    private final Juego modeloJuego;
 
     private final ControladorJuego controlador;
 
@@ -56,15 +57,14 @@ public class JuegoVista extends JuegoBase {
 
         scene = new Scene(root, WIDTH, HEIGHT);
 
-        // Instanciamos el Modelo global Justificado y se lo pasamos al controlador
-        Juego modeloGlobal = new Juego();
-        modeloGlobal.inicializarNiveles(cantidadJugadores);
+        modeloJuego = new Juego();
+        modeloJuego.inicializarNiveles(cantidadJugadores);
 
         ControladorInput input = new ControladorInput(scene, cantidadJugadores);
-        this.controlador = new ControladorJuego(this, modeloGlobal, input);
+        this.controlador = new ControladorJuego(this, modeloJuego, input);
 
         // Ahora sí cargamos el nivel inicial haciendo uso de la configuración
-        cargarNivel(nivelActual);
+        cargarNivel(modeloJuego.obtenerNumeroNivelActual());
         this.controlador.comenzar();
     }
 
@@ -76,39 +76,21 @@ public class JuegoVista extends JuegoBase {
     public int getCantidadJugadores() { return cantidadJugadores; }
     public Scene getScene() { return scene; }
 
-    public void renderizarFrame() {
-        renderizar();
-    }
-
-    public void ejecutarDerrota() {
-        mostrarDerrota();
-    }
-
     public void avanzarSiguienteNivel() {
-        nivelActual++;
-        if (nivelActual > MAX_NIVELES) {
+        modeloJuego.avanzarNivel();
+        if (!modeloJuego.haySiguienteNivel()) {
             mostrarVictoriaFinal();
         } else {
             mostrarVictoriaNivel();
         }
     }
 
-    public void invocarPowerupVisual(double x, double y) {
-        TipoPowerUp[] tipos = TipoPowerUp.values();
-        TipoPowerUp tipo = tipos[(int)(Math.random() * tipos.length)];
-
-        Powerup p = switch (tipo) {
-            case CASCO -> new Casco(x, y);
-            case ESTRELLA -> new Estrella(x, y);
-            case GRANADA -> new Granada(x, y, nivel.getEnemigos());
-        };
-
-        Image sprite = switch (tipo) {
+    public void agregarPowerupView(Powerup p) {
+        Image sprite = switch (p.obtenerTipo()) {
             case CASCO -> new Image(Objects.requireNonNull(getClass().getResourceAsStream(Grafico.POWERUP_CASCO)));
             case ESTRELLA -> new Image(Objects.requireNonNull(getClass().getResourceAsStream(Grafico.POWERUP_ESTRELLA)));
             case GRANADA -> new Image(Objects.requireNonNull(getClass().getResourceAsStream(Grafico.POWERUP_GRANADA)));
         };
-
         powerups.add(p);
         powerupsView.add(new PowerupView(p, sprite));
     }
@@ -160,8 +142,9 @@ public class JuegoVista extends JuegoBase {
         powerups.clear();
         powerupsView.clear();
 
-        nivel = new Nivel(numero, 10, 5, 3.0);
-        nivel.getSpawn().spawnInitial(5, obtenerBloquesModelo(), WIDTH, HEIGHT, jugadores);
+        nivel = modeloJuego.getNivelActual();
+        int spawnInicial = Math.min(nivel.getSpawn().getMaxEnemigosPantalla(), nivel.getSpawn().getEnemigosTotales());
+        nivel.getSpawn().spawnInitial(spawnInicial, obtenerBloquesModelo(), WIDTH, HEIGHT, jugadores);
 
         for (Enemigo e : nivel.getEnemigos()) {
             enemigosView.add(new EnemigoView(e));
@@ -169,7 +152,7 @@ public class JuegoVista extends JuegoBase {
     }
 
     @Override
-    protected void renderizar() {
+    public void renderizar() {
         gc.setFill(javafx.scene.paint.Color.BLACK);
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -210,7 +193,7 @@ public class JuegoVista extends JuegoBase {
 
             gc.drawImage(spriteActual, -Renderizador.TILE_SIZE / 2.0, -Renderizador.TILE_SIZE / 2.0, Renderizador.TILE_SIZE, Renderizador.TILE_SIZE);
 
-            if (j.estaInvulnerable()) {
+            if (j.isInvulnerable()) {
                 double cascoSize = Renderizador.TILE_SIZE * 1.2;
                 gc.drawImage(imgEscudo, -cascoSize / 2.0, -cascoSize / 2.0, cascoSize, cascoSize);
             }
@@ -245,17 +228,17 @@ public class JuegoVista extends JuegoBase {
     }
 
     @Override
-    protected void mostrarDerrota() {
+    public void mostrarDerrota() {
         ejecutarPantallaFinal("¡GAME OVER!", javafx.scene.paint.Color.RED);
     }
 
     @Override
-    protected void mostrarVictoriaFinal() {
+    public void mostrarVictoriaFinal() {
         ejecutarPantallaFinal("¡GANASTE EL JUEGO!", javafx.scene.paint.Color.LIMEGREEN);
     }
 
     @Override
-    protected void mostrarVictoriaNivel() {
+    public void mostrarVictoriaNivel() {
         gameOver = true;
         playSonido.pararMusica();
 
@@ -274,7 +257,7 @@ public class JuegoVista extends JuegoBase {
         delay.setOnFinished(event -> {
             root.getChildren().remove(overlay);
             gameOver = false;
-            cargarNivel(nivelActual);
+            cargarNivel(modeloJuego.obtenerNumeroNivelActual());
             controlador.comenzar();
         });
         delay.play();

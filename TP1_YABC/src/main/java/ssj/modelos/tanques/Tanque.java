@@ -14,7 +14,7 @@ public abstract class Tanque {
     protected boolean puedeAgarrarPowerUps;
     protected Powerup powerUpActivo;
     protected Direccion direccionActual;
-    public boolean invulnerable;
+    private boolean invulnerable;
     protected boolean disparoPotenciado;
 
     public Tanque(double x, double y, int vida, double velocidad) {
@@ -91,15 +91,15 @@ public abstract class Tanque {
         this.invulnerable = invulnerable;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.posicion.setX(x);
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.posicion.setY(y);
     }
 
-    public void setPosicion(int x, int y) {
+    public void setPosicion(double x, double y) {
         this.posicion.setX(x);
         this.posicion.setY(y);
     }

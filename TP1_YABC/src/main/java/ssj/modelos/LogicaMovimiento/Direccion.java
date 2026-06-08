@@ -1,19 +1,17 @@
 package ssj.modelos.LogicaMovimiento;
 
 public enum Direccion {
-    ARRIBA(0, -1, 270),
-    ABAJO(0, 1, 90),
-    IZQUIERDA(-1, 0, 180),
-    DERECHA(1, 0, 0);
+    ARRIBA(0, -1),
+    ABAJO(0, 1),
+    IZQUIERDA(-1, 0),
+    DERECHA(1, 0);
 
     private final int dx;
     private final int dy;
-    private final int angulo; // grados para rotación del sprite
 
-    Direccion(int dx, int dy, int angulo) {
+    Direccion(int dx, int dy) {
         this.dx = dx;
         this.dy = dy;
-        this.angulo = angulo;
     }
 
     public double getDx() {
@@ -22,9 +20,5 @@ public enum Direccion {
 
     public double getDy() {
         return dy;
-    }
-
-    public int getAngulo() {
-        return angulo;
     }
 }

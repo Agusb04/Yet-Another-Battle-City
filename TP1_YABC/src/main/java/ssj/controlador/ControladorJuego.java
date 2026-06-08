@@ -9,12 +9,17 @@ import ssj.modelos.bloques.Bloque;
 import ssj.modelos.bloques.TanqueDestruido;
 import ssj.modelos.bloques.TipoBloque;
 import ssj.modelos.disparo.Disparo;
+import ssj.modelos.powerups.Casco;
+import ssj.modelos.powerups.Estrella;
+import ssj.modelos.powerups.Granada;
 import ssj.modelos.powerups.Powerup;
+import ssj.modelos.powerups.TipoPowerUp;
 import ssj.modelos.tanques.Enemigo;
 import ssj.modelos.tanques.Jugador;
 import ssj.modelos.tanques.Tanque;
 import ssj.modelos.tanques.TipoEnemigo;
-import ssj.vista.Juego.JuegoVista;
+import ssj.modelos.tanques.TipoTanque;
+import ssj.vista.Juego.JuegoBase;
 import ssj.vista.Utils.Renderizador;
 import ssj.vista.View.BloqueView;
 import ssj.vista.View.EnemigoView;
@@ -26,8 +31,10 @@ import java.util.List;
 
 public class ControladorJuego {
 
-    private final JuegoVista vista;
-    private final Juego modeloJuego; // Corregido: Campo restaurado para usar el parámetro
+    private static final int TAM_BALA = 6;
+
+    private final JuegoBase vista;
+    private final Juego modeloJuego;
     private final ControladorInput input;
     private final ControladorSonidos sonidos;
 
@@ -40,7 +47,7 @@ public class ControladorJuego {
     private final int HEIGHT = 660;
     private final double BARRA_INF = 50;
 
-    public ControladorJuego(JuegoVista vista, Juego modeloJuego, ControladorInput input) {
+    public ControladorJuego(JuegoBase vista, Juego modeloJuego, ControladorInput input) {
         this.vista = vista;
         this.modeloJuego = modeloJuego; // Corregido: Parámetro asignado correctamente
         this.input = input;
@@ -84,22 +91,23 @@ public class ControladorJuego {
         if (nivelActual == null) return;
 
         for (Jugador j : vista.getJugadoresActivos()) {
-            if (j.estaInvulnerable()) {
+            if (j.isInvulnerable()) {
                 j.actualizarInvulnerabilidad(deltaTiempo);
             }
         }
 
         procesarInputJugadores(now);
 
+        nivelActual.actualizar(deltaTiempo, vista.obtenerBloquesModelo(), WIDTH, HEIGHT, vista.getJugadoresActivos());
+
         List<Tanque> tanques = new ArrayList<>();
         tanques.addAll(vista.getJugadoresActivos());
         tanques.addAll(nivelActual.getEnemigos());
 
-        nivelActual.actualizar(deltaTiempo, vista.obtenerBloquesModelo(), tanques, WIDTH, HEIGHT, vista.getJugadoresActivos());
-
         actualizarEnemigosLogica(nivelActual, deltaTiempo, tanques);
         actualizarBalasLogica();
         actualizarPowerupsLogica();
+        procesarEnemigosMuertos(nivelActual);
 
         for (Enemigo e : nivelActual.getEnemigos()) {
             boolean yaExiste = vista.getEnemigosView().stream().anyMatch(v -> v.getModelo() == e);
@@ -123,7 +131,7 @@ public class ControladorJuego {
             return;
         }
 
-        vista.renderizarFrame();
+        vista.renderizar();
     }
 
     private void procesarInputJugadores(long now) {
@@ -169,10 +177,10 @@ public class ControladorJuego {
         if (j.getY() < 0) j.setY(0);
         if (j.getX() > WIDTH - Renderizador.TILE_SIZE) j.setX(WIDTH - Renderizador.TILE_SIZE);
         if (j.getY() > HEIGHT - Renderizador.TILE_SIZE - BARRA_INF)
-            j.setY((int) (HEIGHT - Renderizador.TILE_SIZE - BARRA_INF));
+            j.setY(HEIGHT - Renderizador.TILE_SIZE - BARRA_INF);
 
         if (colisionJugadorConBloques(j) || colisionJugadorConEnemigos(j)) {
-            j.setPosicion((int) oldX, (int) oldY);
+            j.setPosicion(oldX, oldY);
         }
     }
 
@@ -197,12 +205,18 @@ public class ControladorJuego {
             if (e.getX() < 0) e.setX(0);
             if (e.getY() < 0) e.setY(0);
             if (e.getX() > WIDTH - Renderizador.TILE_SIZE) e.setX(WIDTH - Renderizador.TILE_SIZE);
-            if (e.getY() > HEIGHT - Renderizador.TILE_SIZE - BARRA_INF) e.setY((int) (HEIGHT - Renderizador.TILE_SIZE - BARRA_INF));
+            if (e.getY() > HEIGHT - Renderizador.TILE_SIZE - BARRA_INF) e.setY(HEIGHT - Renderizador.TILE_SIZE - BARRA_INF);
 
             if (colisionEnemigoConBloques(e) || colisionEntreEnemigos(e)) {
-                e.setPosicion((int) oldX, (int) oldY);
+                e.setPosicion(oldX, oldY);
             }
+        }
+    }
 
+    private void procesarEnemigosMuertos(Nivel nivel) {
+        Iterator<Enemigo> it = nivel.getEnemigos().iterator();
+        while (it.hasNext()) {
+            Enemigo e = it.next();
             if (!e.estaVivo()) {
                 it.remove();
                 sonidos.reproducirMuerteTanque();
@@ -232,7 +246,7 @@ public class ControladorJuego {
             for (int j = i + 1; j < balas.size(); j++) {
                 Disparo b1 = balas.get(i);
                 Disparo b2 = balas.get(j);
-                if (new Rectangle2D(b1.getX(), b1.getY(), 6, 6).intersects(new Rectangle2D(b2.getX(), b2.getY(), 6, 6))) {
+                if (new Rectangle2D(b1.getX(), b1.getY(), TAM_BALA, TAM_BALA).intersects(new Rectangle2D(b2.getX(), b2.getY(), TAM_BALA, TAM_BALA))) {
                     eliminar.add(b1);
                     eliminar.add(b2);
                 }
@@ -242,35 +256,9 @@ public class ControladorJuego {
         eliminar.forEach(Disparo::desactivar);
     }
 
-    private boolean colisionBalaBloques(Disparo d, List<Disparo> eliminar) {
-        Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), 6, 6);
-        for (Iterator<BloqueView> it = vista.getBloquesView().iterator(); it.hasNext(); ) {
-            BloqueView bv = it.next();
-            Bloque b = bv.getModelo();
-            if (b.bloqueaDisparo() && balaBounds.intersects(new Rectangle2D(b.getX(), b.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE))) {
-                b.recibirImpacto();
-                eliminar.add(d);
-                bv.actualizar();
-
-                TipoBloque tipo = b.obtenerTipo();
-
-                if (tipo == TipoBloque.LADRILLO && b.estaDestruido()) sonidos.reproducirDestruccionLadrillo();
-                if (tipo == TipoBloque.ACERO) sonidos.reproducirImpactoAcero();
-                if (tipo == TipoBloque.BASE && b.estaDestruido()) {
-                    sonidos.reproducirDestruccionBase();
-                    detener();
-                    vista.ejecutarDerrota();
-                }
-                if (b.estaDestruido()) it.remove();
-                return true;
-            }
-        }
-        return false;
-    }
-
     private boolean colisionBalaEnemigos(Disparo d, List<Disparo> eliminar) {
-        if (d.getTanqueOrigen().getTipoTanque() == ssj.modelos.tanques.TipoTanque.JUGADOR) {
-            Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), 6, 6);
+        if (d.getTanqueOrigen().getTipoTanque() == TipoTanque.JUGADOR) {
+            Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), TAM_BALA, TAM_BALA);
             Nivel nivel = vista.getNivel();
             if (nivel == null) return false;
 
@@ -293,8 +281,32 @@ public class ControladorJuego {
         return false;
     }
 
+    private boolean colisionBalaBloques(Disparo d, List<Disparo> eliminar) {
+        Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), TAM_BALA, TAM_BALA);
+        for (Iterator<BloqueView> it = vista.getBloquesView().iterator(); it.hasNext(); ) {
+            BloqueView bv = it.next();
+            Bloque b = bv.getModelo();
+            if (b.bloqueaDisparo() && balaBounds.intersects(new Rectangle2D(b.getX(), b.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE))) {
+                b.recibirImpacto();
+                eliminar.add(d);
+
+                TipoBloque tipo = b.obtenerTipo();
+
+                if (tipo == TipoBloque.LADRILLO && b.estaDestruido()) sonidos.reproducirDestruccionLadrillo();
+                if (tipo == TipoBloque.ACERO) sonidos.reproducirImpactoAcero();
+                if (tipo == TipoBloque.BASE && b.estaDestruido()) {
+                    sonidos.reproducirDestruccionBase();
+                    detener();
+                    vista.mostrarDerrota();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void colisionBalaJugadores(Disparo d, List<Disparo> eliminar) {
-        Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), 6, 6);
+        Rectangle2D balaBounds = new Rectangle2D(d.getX(), d.getY(), TAM_BALA, TAM_BALA);
         Tanque origen = d.getTanqueOrigen();
         List<Jugador> jugadores = vista.getJugadoresActivos();
 
@@ -314,7 +326,7 @@ public class ControladorJuego {
 
                         if (jugadores.stream().noneMatch(Jugador::estaVivo)) {
                             detener();
-                            vista.ejecutarDerrota();
+                            vista.mostrarDerrota();
                         }
                     }
                 }
@@ -325,23 +337,35 @@ public class ControladorJuego {
     }
 
     private void actualizarPowerupsLogica() {
-        var itP = vista.getPowerupsModelo().iterator();
-        var itPV = vista.getPowerupsViewActivos().iterator();
+        var it = vista.getPowerupsViewActivos().iterator();
+        while (it.hasNext()) {
+            var pv = it.next();
+            Powerup p = pv.getModelo();
 
-        while (itP.hasNext() && itPV.hasNext()) {
-            Powerup p = itP.next();
-            var pv = itPV.next();
-
+            boolean recolectado = false;
             for (Jugador j : vista.getJugadoresActivos()) {
                 if (new Rectangle2D(j.getX(), j.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE)
                         .intersects(new Rectangle2D(pv.getX(), pv.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE))) {
                     p.activar(j);
-                    itP.remove();
-                    itPV.remove();
+                    recolectado = true;
                     break;
                 }
             }
+            if (recolectado) {
+                it.remove();
+                vista.getPowerupsModelo().remove(p);
+            }
         }
+    }
+
+    private Powerup crearPowerup(double x, double y) {
+        TipoPowerUp[] tipos = TipoPowerUp.values();
+        TipoPowerUp tipo = tipos[(int)(Math.random() * tipos.length)];
+        return switch (tipo) {
+            case CASCO -> new Casco(x, y);
+            case ESTRELLA -> new Estrella(x, y);
+            case GRANADA -> new Granada(x, y, vista.getNivel().getEnemigos());
+        };
     }
 
     private void evaluarSpawnPowerup(double x, double y) {
@@ -352,19 +376,19 @@ public class ControladorJuego {
                     return;
                 }
             }
-            vista.invocarPowerupVisual(x, y);
+            vista.agregarPowerupView(crearPowerup(x, y));
         }
     }
 
     private boolean colisionJugadorConBloques(Jugador j) {
-        Rectangle2D bounds = new Rectangle2D(j.getX() + 2, j.getY() + 2, Renderizador.TILE_SIZE - 4, Renderizador.TILE_SIZE - 4);
+        Rectangle2D bounds = new Rectangle2D(j.getX(), j.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE);
         return vista.getBloquesView().stream()
                 .filter(bv -> !bv.getModelo().esTransitable())
                 .anyMatch(bv -> bounds.intersects(new Rectangle2D(bv.getModelo().getX(), bv.getModelo().getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE)));
     }
 
     private boolean colisionJugadorConEnemigos(Jugador j) {
-        Rectangle2D bounds = new Rectangle2D(j.getX() + 2, j.getY() + 2, Renderizador.TILE_SIZE - 4, Renderizador.TILE_SIZE - 4);
+        Rectangle2D bounds = new Rectangle2D(j.getX(), j.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE);
         Nivel nivel = vista.getNivel();
         return nivel != null && nivel.getEnemigos().stream()
                 .anyMatch(e -> bounds.intersects(new Rectangle2D(e.getX(), e.getY(), Renderizador.TILE_SIZE, Renderizador.TILE_SIZE)));

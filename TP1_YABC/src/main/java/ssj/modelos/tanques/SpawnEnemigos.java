@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class SpawnEnemigos {
 
-    private static final int ENEMIGO_SIZE = 20; // Ajustar al tamaño real de tus celdas si es necesario
+    private static final int ENEMIGO_SIZE = 20;
 
     private final List<Enemigo> enemigos;
     private final int maxEnemigosPantalla;
@@ -35,8 +35,7 @@ public class SpawnEnemigos {
         this.maxSpawnsPorMinuto = Math.max(1, maxSpawnsPorMinuto);
     }
 
-    // Refactorizado: Ahora recibe la lista completa de jugadores activos
-    public void actualizar(double deltaTiempo, List<Bloque> bloques, List<Tanque> tanques, int anchoMapa, int altoMapa, List<Jugador> jugadores) {
+    public void actualizar(double deltaTiempo, List<Bloque> bloques, int anchoMapa, int altoMapa, List<Jugador> jugadores) {
 
         timerVentanaMinuto += deltaTiempo;
         if (timerVentanaMinuto >= 60.0) {
@@ -58,13 +57,6 @@ public class SpawnEnemigos {
                 spawnsEnVentana++;
             } else {
                 tiempoSpawn = Math.min(tiempoSpawn, delaySpawn / 2.0);
-            }
-        }
-
-        List<Enemigo> copia = new ArrayList<>(enemigos);
-        for (Enemigo e : copia) {
-            if (e.estaVivo()) {
-                e.actualizar(deltaTiempo, bloques, tanques, anchoMapa, altoMapa);
             }
         }
 
@@ -164,6 +156,10 @@ public class SpawnEnemigos {
 
     public int getEnemigosTotales() {
         return enemigosTotales;
+    }
+
+    public int getMaxEnemigosPantalla() {
+        return maxEnemigosPantalla;
     }
 
     public List<Enemigo> getEnemigos() {

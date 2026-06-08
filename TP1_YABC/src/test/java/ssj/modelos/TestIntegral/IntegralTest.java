@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ssj.modelos.Nivel.Nivel;
-import ssj.modelos.tanques.*;
+import ssj.modelos.tanques.Enemigo;
+import ssj.modelos.tanques.Jugador;
 import ssj.modelos.bloques.*;
 
 public class IntegralTest {
@@ -16,28 +17,25 @@ public class IntegralTest {
     public void testPasarDeNivel() {
         Jugador jugador = new Jugador(1, 5, 5, 3);
 
-        Nivel nivel1 = new Nivel(1, 2, 2, 0.1); // 2 enemigos
-        Nivel nivel2 = new Nivel(2, 1, 1, 0.1); // 1 enemigo
+        Nivel nivel1 = new Nivel(1, 1, 1, 0.1);
+        Nivel nivel2 = new Nivel(2, 1, 1, 0.1);
 
         List<Nivel> niveles = new ArrayList<>();
         niveles.add(nivel1);
         niveles.add(nivel2);
 
         List<Bloque> bloques = new ArrayList<>();
-        List<Tanque> tanques = new ArrayList<>();
-        tanques.add(jugador);
-
         List<Jugador> listaJugadores = new ArrayList<>();
         listaJugadores.add(jugador);
 
-        nivel1.actualizar(0.1, bloques, tanques, 20, 20, listaJugadores);
+        nivel1.actualizar(0.1, bloques, 200, 200, listaJugadores);
 
         for (Enemigo e : nivel1.getEnemigos()) {
             e.recibirImpacto(true);
         }
         assertTrue(nivel1.estaCompletado(), "Nivel 1 debería estar completado");
 
-        nivel2.actualizar(0.1, bloques, tanques, 20, 20, listaJugadores);
+        nivel2.actualizar(0.1, bloques, 200, 200, listaJugadores);
 
         for (Enemigo e : nivel2.getEnemigos()) {
             e.recibirImpacto(true);
@@ -49,16 +47,13 @@ public class IntegralTest {
     public void testJugadorEliminaTodosLosEnemigos() {
         Jugador jugador = new Jugador(1, 5, 5, 3);
 
-        Nivel nivel = new Nivel(1, 3, 3, 0.1); // 3 enemigos
+        Nivel nivel = new Nivel(1, 1, 1, 0.1);
 
         List<Bloque> bloques = new ArrayList<>();
-        List<Tanque> tanques = new ArrayList<>();
-        tanques.add(jugador);
-
         List<Jugador> listaJugadores = new ArrayList<>();
         listaJugadores.add(jugador);
 
-        nivel.actualizar(0.1, bloques, tanques, 20, 20, listaJugadores);
+        nivel.actualizar(0.1, bloques, 200, 200, listaJugadores);
 
         for (Enemigo e : nivel.getEnemigos()) {
             e.recibirImpacto(true);
@@ -72,8 +67,8 @@ public class IntegralTest {
         Jugador jugador1 = new Jugador(1, 5, 5, 3);
         Jugador jugador2 = new Jugador(2, 15, 5, 3);
 
-        Nivel nivel1 = new Nivel(1, 2, 2, 0.1);
-        Nivel nivel2 = new Nivel(2, 3, 3, 0.1);
+        Nivel nivel1 = new Nivel(1, 1, 1, 0.1);
+        Nivel nivel2 = new Nivel(2, 1, 1, 0.1);
         Nivel nivel3 = new Nivel(3, 1, 1, 0.1);
 
         List<Nivel> niveles = new ArrayList<>();
@@ -82,17 +77,12 @@ public class IntegralTest {
         niveles.add(nivel3);
 
         List<Bloque> bloques = new ArrayList<>();
-        List<Tanque> tanques = new ArrayList<>();
-        tanques.add(jugador1);
-        tanques.add(jugador2);
-
-        // FIX: Creamos la lista incluyendo a AMBOS jugadores para el modo cooperativo
         List<Jugador> listaJugadores = new ArrayList<>();
         listaJugadores.add(jugador1);
         listaJugadores.add(jugador2);
 
         for (Nivel nivel : niveles) {
-            nivel.actualizar(0.1, bloques, tanques, 20, 20, listaJugadores);
+            nivel.actualizar(0.1, bloques, 200, 200, listaJugadores);
 
             for (Enemigo e : nivel.getEnemigos()) {
                 e.recibirImpacto(true);

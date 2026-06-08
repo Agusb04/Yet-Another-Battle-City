@@ -4,7 +4,6 @@ import ssj.modelos.bloques.*;
 import ssj.modelos.tanques.Enemigo;
 import ssj.modelos.tanques.SpawnEnemigos;
 import ssj.modelos.tanques.Jugador;
-import ssj.modelos.tanques.Tanque;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +23,10 @@ public class Nivel {
         return numero;
     }
 
-    /**
-     * Actualiza la lógica del nivel.
-     * Ahora recibe correctamente la lista de todos los jugadores activos en la partida.
-     */
-    public void actualizar(double deltaTiempo, List<Bloque> bloques, List<Tanque> tanques, int width, int height, List<Jugador> jugadores) {
+    public void actualizar(double deltaTiempo, List<Bloque> bloques, int width, int height, List<Jugador> jugadores) {
         this.bloques = new ArrayList<>(bloques);
 
-        // Se le pasa la lista completa al spawn para calcular colisiones correctamente
-        spawn.actualizar(deltaTiempo, bloques, tanques, width, height, jugadores);
+        spawn.actualizar(deltaTiempo, bloques, width, height, jugadores);
     }
 
     /**
